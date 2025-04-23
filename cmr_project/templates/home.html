@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}CareSync - Healthcare Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 3rem 0;
+        text-align: center;
+        margin-bottom: 2rem;
+        border-radius: 0.5rem;
+    }
+    
+    .hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .hero-actions {
+        margin-top: 1.5rem;
+    }
+    
+    .action-btn {
+        display: inline-block;
+        background-color: white;
+        color: var(--primary-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .action-btn:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .patients-section, .hospitals-section {
+        margin-bottom: 3rem;
+    }
+    
+    .patients-section h2, .hospitals-section h2 {
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 0.5rem;
+    }
+    
+    .patient-list, .hospital-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .patient-card, .hospital-card {
+        background-color: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .patient-card:hover, .hospital-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .patient-card h3, .hospital-card h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+    
+    .patient-details p, .hospital-details p {
+        margin-bottom: 0.5rem;
+    }
+    
+    .patient-details i, .hospital-details i {
+        width: 20px;
+        color: var(--primary-color);
+    }
+    
+    .medical-history, .specialties, .services {
+        margin-top: 1rem;
+    }
+    
+    .medical-history h4, .specialties h4, .services h4 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        color: var(--secondary-color);
+    }
+    
+    .medical-history ul, .specialties ul, .services ul {
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .card-actions {
+        margin-top: 1rem;
+        text-align: right;
+    }
+    
+    .view-btn {
+        display: inline-block;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+    }
+    
+    .view-btn:hover {
+        background-color: #0b5ed7;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to CareSync</h1>
+    <p>Your Healthcare Management Solution</p>
+    <div class="hero-actions">
+        <a href="{{ url_for('add_patient') }}" class="action-btn">
+            <i class="fas fa-user-plus"></i> Add New Patient
+        </a>
+    </div>
+</section>
+
+<section class="patients-section">
+    <h2>Patient Information</h2>
+    <div class="patient-list">
+        {% for patient in patients %}
+        <div class="patient-card">
+            <h3>{{ patient.name }}</h3>
+            <div class="patient-details">
+                <p><i class="fas fa-user"></i> ID: {{ patient.patient_id }}</p>
+                <p><i class="fas fa-birthday-cake"></i> Age: {{ patient.age }}</p>
+                <p><i class="fas fa-venus-mars"></i> Gender: {{ patient.gender }}</p>
+                <p><i class="fas fa-phone"></i> Contact: {{ patient.contact_number }}</p>
+                <p><i class="fas fa-map-marker-alt"></i> Location: {{ patient.address }}</p>
+                <p><i class="fas fa-heartbeat"></i> Status: {{ patient.current_status }}</p>
+            </div>
+            <div class="medical-history">
+                <h4>Medical History</h4>
+                <ul>
+                    {% for condition in patient.medical_history %}
+                    <li>{{ condition }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card-actions">
+                <a href="{{ url_for('patient_details', patient_id=patient.patient_id) }}" class="view-btn">
+                    <i class="fas fa-eye"></i> View Details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="hospitals-section">
+    <h2>Available Hospitals</h2>
+    <div class="hospital-list">
+        {% for hospital in hospitals %}
+        <div class="hospital-card">
+            <h3>{{ hospital.name }}</h3>
+            <div class="hospital-details">
+                <p><i class="fas fa-map-marker-alt"></i> {{ hospital.location }}</p>
+                <p><i class="fas fa-phone"></i> {{ hospital.contact_number }}</p>
+                <p><i class="fas fa-bed"></i> Available Beds: {{ hospital.available_beds }}/{{ hospital.total_beds }}</p>
+                <p><i class="fas fa-procedures"></i> ICU Beds: {{ hospital.icu_beds.available }}/{{ hospital.icu_beds.total }}</p>
+            </div>
+            <div class="specialties">
+                <h4>Specialties</h4>
+                <ul>
+                    {% for specialty in hospital.specialties %}
+                    <li>{{ specialty }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="services">
+                <h4>Available Services</h4>
+                <ul>
+                    {% if hospital.ambulance_services %}
+                    <li><i class="fas fa-ambulance"></i> Ambulance Service</li>
+                    {% endif %}
+                    {% if hospital.mental_health_support %}
+                    <li><i class="fas fa-brain"></i> Mental Health Support</li>
+                    {% endif %}
+                    {% if hospital.financial_assistance %}
+                    <li><i class="fas fa-hand-holding-usd"></i> Financial Assistance</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>  
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation to cards
+    const cards = document.querySelectorAll('.patient-card, .hospital-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-5px)';
+            card.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+{% endblock %} 

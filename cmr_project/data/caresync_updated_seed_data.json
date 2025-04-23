@@ -1,0 +1,153 @@
+{
+    "patients": [
+        {
+            "patient_id": "P12345",
+            "name": "Rajesh Kumar",
+            "age": 47,
+            "gender": "Male",
+            "contact_number": "+91-9876543210",
+            "address": "Chennai, Tamil Nadu",
+            "medical_history": [
+                "Diabetes",
+                "Hypertension"
+            ],
+            "current_status": "Awaiting Transfer",
+            "referred_by": "NURSING001",
+            "assigned_hospital_id": "MSH001",
+            "ambulance_status": "Requested",
+            "documents": [
+                {
+                    "doc_name": "X-ray Report",
+                    "url": "/uploads/p12345/xray.pdf"
+                }
+            ]
+        }
+    ],
+    "pros": [
+        {
+            "pro_id": "PRO001",
+            "name": "Anita Sharma",
+            "assigned_hospital_id": "MSH001",
+            "contact": "+91-9012345678",
+            "email": "anita.sharma@apollohospitals.in",
+            "patients_assigned": [
+                "P12345"
+            ]
+        }
+    ],
+    "ambulance_requests": [
+        {
+            "request_id": "AMB123",
+            "patient_id": "P12345",
+            "requested_by": "NURSING001",
+            "pickup_location": "Sunrise Clinic, Chennai",
+            "drop_location": "Apollo Hospitals, Chennai",
+            "status": "In Transit",
+            "driver_details": {
+                "name": "Ravi Singh",
+                "contact": "+91-9999999999"
+            }
+        }
+    ],
+    "counseling_resources": [
+        {
+            "resource_id": "CR001",
+            "type": "Financial",
+            "title": "Low Income Patient Aid Program",
+            "contact_person": "Mr. Kumar",
+            "phone": "+91-9870000000",
+            "available": true,
+            "hospital_id": "MSH001"
+        }
+    ],
+    "nursing_homes": [
+        {
+            "clinic_id": "NURSING001",
+            "name": "Sunrise Clinic",
+            "location": "Chennai",
+            "contact_person": "Dr. Nivedha",
+            "phone": "+91-9888888888",
+            "email": "sunriseclinic@example.com",
+            "password": "141cd0b044531f61975f1b9371ba490b2e4683b4a4305cd19dc4f988715ed545"
+        }
+    ],
+    "multispeciality_hospitals": [
+        {
+            "hospital_id": "MSH001",
+            "name": "Apollo Hospitals",
+            "location": "Chennai, Tamil Nadu",
+            "contact_number": "+91-9000000000",
+            "specialties": [
+                "Cardiology",
+                "Neurology",
+                "Emergency"
+            ],
+            "total_beds": 150,
+            "available_beds": 12,
+            "icu_beds": {
+                "total": 30,
+                "available": 5
+            },
+            "ambulance_services": true,
+            "mental_health_support": true,
+            "financial_assistance": true
+        },
+        {
+            "hospital_id": "H33992900",
+            "name": "Dr Agarwals eye hospital",
+            "location": "kuvempu nagar",
+            "contact_number": "9892398789",
+            "total_beds": 20,
+            "available_beds": 10,
+            "icu_beds": {
+                "total": 5,
+                "available": 2
+            },
+            "specialties": [
+                "lasik",
+                "cornea"
+            ],
+            "ambulance_services": true,
+            "mental_health_support": false,
+            "financial_assistance": false
+        },
+        {
+            "hospital_id": "HED09794D",
+            "name": "narayana hospital",
+            "location": "sarashwathipuram",
+            "contact_number": "897456548",
+            "total_beds": 15,
+            "available_beds": 10,
+            "icu_beds": {
+                "total": 2,
+                "available": 2
+            },
+            "specialties": [
+                "cardio",
+                "neuro"
+            ],
+            "ambulance_services": true,
+            "mental_health_support": true,
+            "financial_assistance": true
+        },
+        {
+            "hospital_id": "H2AAB3ABE",
+            "name": "danavantri",
+            "location": "kuvempu nagar",
+            "contact_number": "88548548547",
+            "total_beds": 12,
+            "available_beds": 3,
+            "icu_beds": {
+                "total": 10,
+                "available": 2
+            },
+            "specialties": [
+                "cardio",
+                "neuro"
+            ],
+            "ambulance_services": true,
+            "mental_health_support": false,
+            "financial_assistance": false
+        }
+    ]
+}

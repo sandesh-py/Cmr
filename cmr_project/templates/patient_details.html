@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Details - CareSync{% endblock %}
+
+{% block content %}
+<section class="patient-details-section">
+    <div class="patient-header">
+        <h1>Patient Details</h1>
+        <div class="patient-status {{ patient.current_status|lower|replace(' ', '-') }}">
+            {{ patient.current_status }}
+        </div>
+    </div>
+
+    <div class="patient-info-grid">
+        <div class="patient-card">
+            <h2>{{ patient.name }}</h2>
+            <div class="patient-details">
+                <p><i class="fas fa-user"></i> ID: {{ patient.patient_id }}</p>
+                <p><i class="fas fa-birthday-cake"></i> Age: {{ patient.age }}</p>
+                <p><i class="fas fa-venus-mars"></i> Gender: {{ patient.gender }}</p>
+                <p><i class="fas fa-phone"></i> Contact: {{ patient.contact_number }}</p>
+                <p><i class="fas fa-map-marker-alt"></i> Location: {{ patient.address }}</p>
+            </div>
+            <div class="medical-history">
+                <h3>Medical History</h3>
+                <ul>
+                    {% for condition in patient.medical_history %}
+                    <li>{{ condition }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="hospital-card">
+            <h2>Assigned Hospital</h2>
+            {% if hospital %}
+            <div class="hospital-details">
+                <h3>{{ hospital.name }}</h3>
+                <p><i class="fas fa-map-marker-alt"></i> {{ hospital.location }}</p>
+                <p><i class="fas fa-phone"></i> {{ hospital.contact_number }}</p>
+                <p><i class="fas fa-bed"></i> Available Beds: {{ hospital.available_beds }}/{{ hospital.total_beds }}</p>
+                <p><i class="fas fa-procedures"></i> ICU Beds: {{ hospital.icu_beds.available }}/{{ hospital.icu_beds.total }}</p>
+            </div>
+            <div class="specialties">
+                <h3>Specialties</h3>
+                <ul>
+                    {% for specialty in hospital.specialties %}
+                    <li>{{ specialty }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% else %}
+            <p class="no-data">No hospital assigned yet</p>
+            {% endif %}
+        </div>
+
+        <div class="pro-card">
+            <h2>Patient Relations Officer</h2>
+            {% if pro %}
+            <div class="pro-details">
+                <h3>{{ pro.name }}</h3>
+                <p><i class="fas fa-phone"></i> {{ pro.contact }}</p>
+                <p><i class="fas fa-envelope"></i> {{ pro.email }}</p>
+            </div>
+            {% else %}
+            <div class="pro-request">
+                <p class="no-data">No PRO assigned yet</p>
+                <button class="request-btn" onclick="showProAssignmentForm()">Assign PRO</button>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="ambulance-card">
+            <h2>Ambulance Status</h2>
+            {% if ambulance %}
+            <div class="ambulance-details">
+                <p><i class="fas fa-ambulance"></i> Status: {{ ambulance.status }}</p>
+                <p><i class="fas fa-map-marker-alt"></i> Pickup: {{ ambulance.pickup_location }}</p>
+                <p><i class="fas fa-map-marker-alt"></i> Drop: {{ ambulance.drop_location }}</p>
+                <p><i class="fas fa-clock"></i> Requested: {{ ambulance.created_at }}</p>
+            </div>
+            {% else %}
+            <div class="ambulance-request">
+                <p class="no-data">No ambulance requested yet</p>
+                <button class="request-btn" onclick="showAmbulanceRequestForm()">Request Ambulance</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Ambulance Request Form (Hidden by default) -->
+    <div id="ambulanceRequestForm" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-btn" onclick="hideAmbulanceRequestForm()">&times;</span>
+            <h2>Request Ambulance</h2>
+            <form id="ambulanceForm">
+                <div class="form-group">
+                    <label for="pickup_location">Pickup Location</label>
+                    <input type="text" id="pickup_location" name="pickup_location" required>
+                </div>
+                <div class="form-group">
+                    <label for="drop_location">Drop Location</label>
+                    <input type="text" id="drop_location" name="drop_location" required>
+                </div>
+                <button type="submit" class="submit-btn">Request Ambulance</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PRO Assignment Form (Hidden by default) -->
+    <div id="proAssignmentForm" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-btn" onclick="hideProAssignmentForm()">&times;</span>
+            <h2>Assign Patient Relations Officer</h2>
+            <form id="proForm">
+                <div class="form-group">
+                    <label for="pro_id">Select PRO</label>
+                    <select id="pro_id" name="pro_id" required>
+                        <option value="">Select a PRO...</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Assign PRO</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showAmbulanceRequestForm() {
+    document.getElementById('ambulanceRequestForm').style.display = 'block';
+}
+
+function hideAmbulanceRequestForm() {
+    document.getElementById('ambulanceRequestForm').style.display = 'none';
+}
+
+document.getElementById('ambulanceForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        pickup_location: document.getElementById('pickup_location').value,
+        drop_location: document.getElementById('drop_location').value
+    };
+
+    try {
+        const response = await fetch(`/patient/{{ patient.patient_id }}/request-ambulance`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+        if (data.status === 'success') {
+            alert('Ambulance requested successfully!');
+            window.location.reload();
+        } else {
+            alert('Error requesting ambulance: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    }
+});
+
+function showProAssignmentForm() {
+    document.getElementById('proAssignmentForm').style.display = 'block';
+    loadPros();
+}
+
+function hideProAssignmentForm() {
+    document.getElementById('proAssignmentForm').style.display = 'none';
+}
+
+async function loadPros() {
+    try {
+        const response = await fetch('/api/pros');
+        const pros = await response.json();
+        
+        const proSelect = document.getElementById('pro_id');
+        proSelect.innerHTML = '<option value="">Select a PRO...</option>';
+        
+        pros.forEach(pro => {
+            const option = document.createElement('option');
+            option.value = pro.pro_id;
+            option.textContent = `${pro.name} (${pro.assigned_hospital_id})`;
+            proSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading PROs:', error);
+        alert('Failed to load PROs. Please try again.');
+    }
+}
+
+document.getElementById('proForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        pro_id: document.getElementById('pro_id').value
+    };
+
+    try {
+        const response = await fetch(`/patient/{{ patient.patient_id }}/assign-pro`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+        if (data.status === 'success') {
+            alert('PRO assigned successfully!');
+            window.location.reload();
+        } else {
+            alert('Error assigning PRO: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    }
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const ambulanceModal = document.getElementById('ambulanceRequestForm');
+    const proModal = document.getElementById('proAssignmentForm');
+    
+    if (event.target == ambulanceModal) {
+        ambulanceModal.style.display = 'none';
+    }
+    
+    if (event.target == proModal) {
+        proModal.style.display = 'none';
+    }
+}
+</script>
+{% endblock %} 

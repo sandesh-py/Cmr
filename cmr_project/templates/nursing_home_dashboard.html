@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Nursing Home Dashboard - CareSync{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-hospital-user fa-2x me-3"></i>
+                            <h2 class="mb-0">{{ nursing_home_name }} Dashboard</h2>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('list_hospitals') }}" class="btn btn-outline-light">
+                                <i class="fas fa-hospital me-2"></i>View Hospitals
+                            </a>
+                            <a href="{{ url_for('nursing_home_logout') }}" class="btn btn-outline-light">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Patients</h6>
+                            <h2 class="mt-2 mb-0">{{ patients|length }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Transferred</h6>
+                            <h2 class="mt-2 mb-0">{{ patients|selectattr('current_status', 'equalto', 'Transferred')|list|length }}</h2>
+                        </div>
+                        <i class="fas fa-hospital fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Pending</h6>
+                            <h2 class="mt-2 mb-0">{{ patients|selectattr('current_status', 'equalto', 'Pending')|list|length }}</h2>
+                        </div>
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Available Hospitals</h6>
+                            <h2 class="mt-2 mb-0">{{ hospitals|length }}</h2>
+                        </div>
+                        <i class="fas fa-hospital-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Actions Section -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-lg h-100">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('add_patient') }}" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>Add New Patient
+                        </a>
+                        <a href="{{ url_for('list_hospitals') }}" class="btn btn-secondary">
+                            <i class="fas fa-hospital me-2"></i>View Hospitals
+                        </a>
+                        <a href="{{ url_for('about') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle me-2"></i>About CareSync
+                        </a>
+                        <a href="{{ url_for('contact') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-envelope me-2"></i>Contact Support
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patients List Section -->
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0"><i class="fas fa-users me-2"></i>Your Patients</h3>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-light btn-sm" id="filterAll">All</button>
+                        <button type="button" class="btn btn-outline-light btn-sm" id="filterTransferred">Transferred</button>
+                        <button type="button" class="btn btn-outline-light btn-sm" id="filterPending">Pending</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if patients %}
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="patientsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Patient ID</th>
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                        <th>Hospital</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for patient in patients %}
+                                    <tr data-status="{{ patient.current_status }}">
+                                        <td>{{ patient.patient_id }}</td>
+                                        <td>{{ patient.name }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if patient.current_status == 'Transferred' else 'warning' }}">
+                                                {{ patient.current_status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% set hospital = namespace(found=None) %}
+                                            {% for h in hospitals %}
+                                                {% if h.hospital_id == patient.assigned_hospital_id %}
+                                                    {% set hospital.found = h %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            {{ hospital.found.name if hospital.found else 'Not Assigned' }}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('patient_details', patient_id=patient.patient_id) }}" 
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if patient.current_status == 'Pending' %}
+                                                <button type="button" class="btn btn-sm btn-success" 
+                                                        onclick="requestAmbulance('{{ patient.patient_id }}')">
+                                                    <i class="fas fa-ambulance"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No patients found. Click "Add New Patient" to get started.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filter functionality
+    document.getElementById('filterAll').addEventListener('click', function() {
+        filterPatients('all');
+    });
+    
+    document.getElementById('filterTransferred').addEventListener('click', function() {
+        filterPatients('Transferred');
+    });
+    
+    document.getElementById('filterPending').addEventListener('click', function() {
+        filterPatients('Pending');
+    });
+    
+    function filterPatients(status) {
+        const rows = document.querySelectorAll('#patientsTable tbody tr');
+        rows.forEach(row => {
+            if (status === 'all' || row.dataset.status === status) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    // Ambulance request functionality
+    function requestAmbulance(patientId) {
+        if (confirm('Are you sure you want to request an ambulance for this patient?')) {
+            fetch(`/patient/${patientId}/request-ambulance`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Ambulance request sent successfully!');
+                    location.reload();
+                } else {
+                    alert('Error sending ambulance request: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error sending ambulance request. Please try again.');
+            });
+        }
+    }
+</script>
+{% endblock %} 
